@@ -2,6 +2,12 @@
 
 ## Installation
 
+Install Chromium:
+
+```bash
+sudo apt-get install chromium-browser --yes
+```
+
 Install Node:
 
 ```bash
@@ -84,44 +90,6 @@ The script opens the URL, waits 5 seconds for it to fully load and then saves a 
 
 If you are running your eInk display direct from your Pi (such as using a Waveshare screen) you can stop here and point your display to the new image. If however, you are using a screen elsewhere on your network you will need to host it, this is where Node Express comes in.
 
-### Installing Node Express
-
-As with Node and Puppeteer installing is via a simple one line command:
-
-```bash
-npm install express --save
-```
-
-To start the server and host the image, you need another script. So the same as before, create a script, we called ours server.js:
-
-```bash
-sudo nano server.js
-```
-
-Cut and paste the following:
-
-```javascript
-var express = require('express');
-var app = express();
-var path = require('path');
-var public = path.join(__dirname, 'public');
-
-// viewed at http://localhost:8080
-app.get('/', function(req, res) {
-    res.sendFile(path.join(public, 'index.html'));
-});
-app.use('/', express.static(public));
-app.listen(8080);
-```
-
-The above script runs a server at http://localhost:8080 where you can install a welcome page (index.html) if you wish but more importantly you can serve static files, in our case our screen grab eink.jpg. Note that the folder address is ‘public’ this is where you will host your files.
-
-In our first script we now want to edit the folder where our image is saved, so we can host it as soon as it is created, so simply edit the file, (again using sudo nano webpage.js) to include the ‘public’ directory -ie /home/pi/Scripts/public/eink.jpg
-
-If you now go to either http://localhost:8080/eink.jpg on the host machine or your http://Your IP of the PI:8080/eink.jpg you should be able to view the jpg.
-
-All that needs to be done now is to start the server when the Pi boots and to run the webpage script every set period of time. To load different webpages simply clone the webpage.js script but with a different URL to grab and run it at a different time, as mentioned, we run 4 scripts an hour via cron jobs.
-
 ### Cron Jobs
 
 The final part is to run the server at boot and the script every 15 minutes.
@@ -129,7 +97,7 @@ The final part is to run the server at boot and the script every 15 minutes.
 Firstly go to your root directory by typing:
 
 ```bash
-cd:
+cd /
 ```
 
 Now we want to install a new Cron Job, or edit one we have already set up:
@@ -141,10 +109,7 @@ sudo crontab -e
 At the end of the file that opens add the following lines:
 
 ```bash
-@reboot sudo /usr/bin/node /home/pi/Scripts/server.js
 15 * * * * /usr/bin/node /home/pi/Scripts/webpage.js
 ```
 
-Whenever the Pi reboots it will now start the server – via your `server.js` script and every 15 minutes run your webpage.js script to take an image of a webpage, which you can subsequently point your eInk screen to load.
-
-It may feel like a number of hoops to jump through for a simple screen-grab, but once running it opens up the wider world of Node.js and Puppeteer as well as the ability to use your eInk screen to display any webpage you want.
+Every 15 minutes run your webpage.js script to take an image of a webpage, which you can subsequently point your eInk screen to load.
